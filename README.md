@@ -1,9 +1,13 @@
 # Robotcat
 
-A simple Github repository search replace
+A simple Github repository tool
 
-- Simple script to search replace in a file and create a new branch on github with the change
+- Search: Search and replace in a file and create a new branch
+- Remove: Remove a branch from a repository
 
 ```bash
-GITHUB_TOKEN= npx robotcat -r owner/repo -f .buildkite/pipeline.yml -b master -m 'master - main' -b main -o master main
+GITHUB_TOKEN= npx robotcat search -r owner/repo -f .buildkite/pipeline.yml -b master -m 'master - main' -b main -o master main
+
+GITHUB_TOKEN= npx robotcat remove -r owner/repo master
+```
 ```
