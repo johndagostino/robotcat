@@ -8,6 +8,6 @@ A simple Github repository tool
 ```bash
 GITHUB_TOKEN= npx robotcat search -r owner/repo -f .buildkite/pipeline.yml -b master -m 'master - main' -b main -o master main
 
-GITHUB_TOKEN= npx robotcat remove -r owner/repo master
+GITHUB_TOKEN= npx robotcat remove owner/repo master
 ```
 ```
