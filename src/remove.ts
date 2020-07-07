@@ -1,5 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import { Logger } from 'winston';
+import { getRepository } from './utils';
 
 export const remove = async (options: {
   repo?: string;
@@ -12,21 +13,18 @@ export const remove = async (options: {
 
   const { branch, client, logger } = options;
 
-  try {
-    const repository = await client.repos.get({ owner, repo });
-    logger.info(`repository loaded: ${repository?.data?.full_name}`);
-  } catch (e) {
-    logger.error(`failed to load repo ${options.repo}`);
+  const repository = await getRepository(client, { logger, owner, repo });
+  if (!repository) {
     return;
   }
 
-  const branchResp = await client.repos.getBranch({
-    owner,
-    repo,
-    branch,
-  });
-
   try {
+    await client.repos.getBranch({
+      owner,
+      repo,
+      branch,
+    });
+
     await client.git.deleteRef({
       owner,
       repo,

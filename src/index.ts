@@ -4,6 +4,7 @@ import winston from 'winston';
 import { commit } from './search';
 import { remove } from './remove';
 import { pullRequest } from './pull_request';
+import { removePackage } from './remove_package';
 
 const logger = winston.createLogger({
   transports: [new winston.transports.Console()],
@@ -56,6 +57,14 @@ const pullRequestCommand = new Command('pr')
       title: options.title,
       base: options.base,
     });
+  });
+
+const removePackageCommand = new Command('remove-package')
+  .arguments('<repo> <packageName>')
+  .option('-o, --override', 'override existing branch')
+  .option('-p, --parent <base>', 'Parent branch')
+  .action((repo, packageName) => {
+    return removePackage({ client, logger, packageName, repo });
   });
 
 const program = new Command();

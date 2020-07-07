@@ -1,29 +1,34 @@
 import { Octokit } from '@octokit/rest';
 import { Logger } from 'winston';
+
 import { getRepository, createBranch, getFileContent } from './utils';
 
-export const commit = async (options: {
+const getBranchFromPackage = (packageName: string) => {
+  return packageName;
+};
+
+export const removePackage = async (options: {
   repo?: string;
-  client: Octokit;
-  logger: Logger;
-  file?: string;
-  message?: string;
-  base?: string;
-  override?: boolean;
+  packageName: string;
   branch?: string;
-  search?: string;
-  replace?: string;
+  base?: string;
+  message?: string;
+  override?: boolean;
+  logger: Logger;
+  client: Octokit;
 }) => {
   const [owner, repo] = options.repo.split('/');
   if (!owner || !repo) throw Error('Invalid Repository');
 
-  const { logger, client } = options;
+  const {
+    message,
+    branch: branchName,
+    packageName,
+    client,
+    logger,
+  } = options;
   const base = options.base ?? 'develop';
-  const message = options.message;
-  const branch = options.branch;
-  const file = options.file;
-
-  logger.info(file);
+  const branch = branchName ? branchName : getBranchFromPackage(packageName);
 
   const repository = await getRepository(client, { logger, owner, repo });
   if (!repository) {
@@ -38,22 +43,34 @@ export const commit = async (options: {
     base,
     branch,
   });
-  const text = await getFileContent(client, {
-    owner,
-    repo,
-    path: file,
-    ref: reference?.data?.ref,
-  });
 
-  const re = new RegExp(options.search, 'g');
-  // replaceAll
-  const result = text.replace(re, options.replace);
+  const ref = reference?.data?.ref;
+  const packageContent = await getFileContent(client, {
+    owner,
+    path: 'package.json',
+    repo,
+    ref,
+  });
+  const yarnContent = await getFileContent(client, {
+    owner,
+    path: 'yarn.lock',
+    repo,
+    ref,
+  });
 
   const tree = await client.git.createTree({
     base_tree: sha,
     owner: owner,
     repo: repo,
-    tree: [{ path: file, mode: '100644', type: 'blob', content: result }],
+    tree: [
+      {
+        path: 'package.json',
+        mode: '100644',
+        type: 'blob',
+        content: packageContent,
+      },
+      { path: 'yarn.lock', mode: '100644', type: 'blob', content: yarnContent },
+    ],
   });
 
   const newCommitResult = await client.git.createCommit({
