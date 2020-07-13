@@ -3,6 +3,7 @@ import { Command } from 'commander';
 import winston from 'winston';
 import { commit } from './search';
 import { remove } from './remove';
+import { pullRequest } from './pull_request';
 
 const logger = winston.createLogger({
   transports: [new winston.transports.Console()],
@@ -42,8 +43,17 @@ const removeCommand = new Command('remove')
     return remove({ client, logger, branch, repo });
   });
 
+const pullRequestCommand = new Command('pr')
+  .arguments('<repo> <branch>')
+  .option('-b, --base <base>', 'Base branch', 'develop')
+  .action((repo, branch) => {
+    return pullRequest({ client, logger, branch, repo, base: pullRequestCommand.base });
+  });
+
+
 const program = new Command();
 program.version('0.0.1');
 program.addCommand(searchCommand);
 program.addCommand(removeCommand);
+program.addCommand(pullRequestCommand);
 program.parse(process.argv);
