@@ -4,6 +4,7 @@ import { Logger } from 'winston';
 export const pullRequest = async (options: {
   repo?: string;
   branch?: string;
+  title?: string;
   base?: string;
   logger: Logger;
   client: Octokit;
@@ -27,7 +28,7 @@ export const pullRequest = async (options: {
     branch,
   });
 
-  const title = 'Pull Request';
+  const title = options.title ?? `${base} to ${branch}`;
 
   try {
     await client.pulls.create({ owner, repo, title, base, head: branch });

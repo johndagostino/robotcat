@@ -46,8 +46,9 @@ const removeCommand = new Command('remove')
 const pullRequestCommand = new Command('pr')
   .arguments('<repo> <branch>')
   .option('-b, --base <base>', 'Base branch', 'develop')
+  .option('-t, --title <title>', 'PR Title', '')
   .action((repo, branch) => {
-    return pullRequest({ client, logger, branch, repo, base: pullRequestCommand.base });
+    return pullRequest({ client, logger, branch, repo, title: pullRequestCommand.title, base: pullRequestCommand.base });
   });
 
 
