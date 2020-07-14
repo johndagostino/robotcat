@@ -28,7 +28,9 @@ export const pullRequest = async (options: {
     branch,
   });
 
-  const title = options.title ?? `${base} to ${branch}`;
+  const title = options.title || `${branch} -> ${base}`;
+
+  logger.info(`Creating PR from ${branch} to ${base} with ${title}`);
 
   try {
     await client.pulls.create({ owner, repo, title, base, head: branch });

@@ -15,23 +15,23 @@ const client = new Octokit({
 
 const searchCommand = new Command('search');
 searchCommand
-  .requiredOption('-m, --message <message>', 'Commit message')
   .option('-b, --branch <branch>', 'Commit branch')
+  .option('-o, --override', 'override existing branch')
   .requiredOption('-r, --repo <repo>', 'Github repository')
+  .requiredOption('-m, --message <message>', 'Commit message')
   .requiredOption('-f, --file <file>', 'File to change')
-  .requiredOption('-o, --override', 'override existing branch')
-  .requiredOption('-p, --parent <base>', 'Parent branch')
+  .requiredOption('-p, --parent <parent>', 'Parent branch')
   .arguments('<search> <replace>')
-  .action((term, replacement) => {
-    return commit({
+  .action((term, replacement, options) => {
+    commit({
       client,
       logger,
-      base: searchCommand.parent,
-      file: searchCommand.file,
-      branch: searchCommand.branch,
-      override: searchCommand.override,
-      repo: searchCommand.repo,
-      message: searchCommand.message,
+      base: options.parent,
+      file: options.file,
+      branch: options.branch,
+      override: options.override,
+      repo: options.repo,
+      message: options.message,
       search: term,
       replace: replacement,
     });
@@ -40,17 +40,23 @@ searchCommand
 const removeCommand = new Command('remove')
   .arguments('<repo> <branch>')
   .action((repo, branch) => {
-    return remove({ client, logger, branch, repo });
+    remove({ client, logger, branch, repo });
   });
 
 const pullRequestCommand = new Command('pr')
   .arguments('<repo> <branch>')
   .option('-b, --base <base>', 'Base branch', 'develop')
   .option('-t, --title <title>', 'PR Title', '')
-  .action((repo, branch) => {
-    return pullRequest({ client, logger, branch, repo, title: pullRequestCommand.title, base: pullRequestCommand.base });
+  .action((repo, branch, options) => {
+    pullRequest({
+      client,
+      logger,
+      branch,
+      repo,
+      title: options.title,
+      base: options.base,
+    });
   });
-
 
 const program = new Command();
 program.version('0.0.1');
