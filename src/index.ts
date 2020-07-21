@@ -20,13 +20,13 @@ searchCommand
   .requiredOption('-r, --repo <repo>', 'Github repository')
   .requiredOption('-m, --message <message>', 'Commit message')
   .requiredOption('-f, --file <file>', 'File to change')
-  .requiredOption('-p, --parent <parent>', 'Parent branch')
+  .requiredOption('-p, --parent <parentBranch>', 'Parent branch')
   .arguments('<search> <replace>')
   .action((term, replacement, options) => {
     commit({
       client,
       logger,
-      base: options.parent,
+      base: options.parentBranch,
       file: options.file,
       branch: options.branch,
       override: options.override,
