@@ -10,6 +10,6 @@ A simple Github repository tool
 GITHUB_TOKEN= npx robotcat search -r owner/repo -f .buildkite/pipeline.yml -b master -m 'master - main' -b main -o master main
 
 GITHUB_TOKEN= npx robotcat remove owner/repo master
-```
+GITHUB_TOKEN= npx robotcat pr owner/repo main -b develop -t 'merge main into develop'
 ```
 
