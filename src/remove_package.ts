@@ -1,7 +1,7 @@
 import { Octokit } from '@octokit/rest';
 import { Logger } from 'winston';
-
-import { getRepository, createBranch, getFileContent } from './utils';
+import { getOwnerRepo } from './utils';
+import { Client } from './client';
 
 const getBranchFromPackage = (packageName: string) => {
   return packageName;
@@ -17,26 +17,18 @@ export const removePackage = async (options: {
   logger: Logger;
   client: Octokit;
 }) => {
-  const [owner, repo] = options.repo.split('/');
-  if (!owner || !repo) throw Error('Invalid Repository');
-
-  const {
-    message,
-    branch: branchName,
-    packageName,
-    client,
-    logger,
-  } = options;
+  const { owner, repo } = getOwnerRepo(options.repo);
+  const { message, branch: branchName, packageName, client, logger } = options;
   const base = options.base ?? 'develop';
   const branch = branchName ? branchName : getBranchFromPackage(packageName);
+  const robotcat = new Client(client, logger);
 
-  const repository = await getRepository(client, { logger, owner, repo });
+  const repository = await robotcat.getRepository({ owner, repo });
   if (!repository) {
     return;
   }
 
-  const { reference, sha } = await createBranch(client, {
-    logger,
+  const { reference, sha } = await robotcat.createBranch({
     override: options.override,
     owner,
     repo,
@@ -45,47 +37,39 @@ export const removePackage = async (options: {
   });
 
   const ref = reference?.data?.ref;
-  const packageContent = await getFileContent(client, {
+
+  const packageContent = await robotcat.getFileContent({
     owner,
     path: 'package.json',
     repo,
     ref,
   });
-  const yarnContent = await getFileContent(client, {
+  const yarnContent = await robotcat.getFileContent({
     owner,
     path: 'yarn.lock',
     repo,
     ref,
   });
 
-  const tree = await client.git.createTree({
-    base_tree: sha,
-    owner: owner,
-    repo: repo,
-    tree: [
+  // yarn rm packagename
+
+  await robotcat.commit(
+    {
+      owner,
+      repo,
+      message,
+      sha,
+      branch,
+    },
+    [
       {
-        path: 'package.json',
-        mode: '100644',
-        type: 'blob',
         content: packageContent,
+        path: 'package.json',
       },
-      { path: 'yarn.lock', mode: '100644', type: 'blob', content: yarnContent },
-    ],
-  });
-
-  const newCommitResult = await client.git.createCommit({
-    message: message,
-    owner,
-    parents: [sha],
-    repo: repo,
-    tree: tree.data.sha,
-  });
-
-  const newCommitSha = newCommitResult?.data?.sha;
-  await client.git.updateRef({
-    owner,
-    ref: `heads/${branch}`,
-    repo,
-    sha: newCommitSha,
-  });
+      {
+        content: yarnContent,
+        path: 'yarn.lock',
+      },
+    ]
+  );
 };

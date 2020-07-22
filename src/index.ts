@@ -72,4 +72,5 @@ program.version('0.0.1');
 program.addCommand(searchCommand);
 program.addCommand(removeCommand);
 program.addCommand(pullRequestCommand);
+program.addCommand(removePackageCommand);
 program.parse(process.argv);
