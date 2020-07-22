@@ -56,6 +56,12 @@ export const commit = async (options: {
   const re = new RegExp(options.search, 'g');
   // replaceAll
   const result = text.replace(re, options.replace);
+
+  if (result === text) {
+    logger.error('File not changed');
+    return;
+  }
+
   await robotcat.commit({ owner, repo, branch, sha, message }, [
     { path: file, type: 'blob', mode: '100644', content: result },
   ]);
