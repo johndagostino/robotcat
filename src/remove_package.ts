@@ -51,6 +51,8 @@ export const removePackage = async (options: {
     ref,
   });
 
+  if (!packageContent || !yarnContent) { return; }
+
   // yarn rm packagename
 
   await robotcat.commit(

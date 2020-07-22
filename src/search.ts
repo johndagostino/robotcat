@@ -51,6 +51,8 @@ export const commit = async (options: {
     ref,
   });
 
+  if (!text) return;
+
   const re = new RegExp(options.search, 'g');
   // replaceAll
   const result = text.replace(re, options.replace);
