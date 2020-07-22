@@ -57,6 +57,6 @@ export const commit = async (options: {
   // replaceAll
   const result = text.replace(re, options.replace);
   await robotcat.commit({ owner, repo, branch, sha, message }, [
-    { path: file, mode: '100644', type: 'blob', content: result },
+    { path: file, type: 'blob', content: result },
   ]);
 };
