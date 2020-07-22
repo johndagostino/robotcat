@@ -1,5 +1,7 @@
 import { Octokit } from '@octokit/rest';
 import { Logger } from 'winston';
+import { Client } from './client';
+import { getOwnerRepo } from './utils';
 
 export const remove = async (options: {
   repo?: string;
@@ -7,31 +9,17 @@ export const remove = async (options: {
   logger: Logger;
   client: Octokit;
 }) => {
-  const [owner, repo] = options.repo.split('/');
-  if (!owner || !repo) throw Error('Invalid Repository');
-
+  const { owner, repo } = getOwnerRepo(options.repo);
   const { branch, client, logger } = options;
+  const robotcat = new Client(client, logger);
 
-  try {
-    const repository = await client.repos.get({ owner, repo });
-    logger.info(`repository loaded: ${repository?.data?.full_name}`);
-  } catch (e) {
-    logger.error(`failed to load repo ${options.repo}`);
+  const repository = await robotcat.getRepository({ owner, repo });
+  if (!repository) {
     return;
   }
 
-  const branchResp = await client.repos.getBranch({
-    owner,
-    repo,
-    branch,
-  });
-
   try {
-    await client.git.deleteRef({
-      owner,
-      repo,
-      ref: `heads/${branch}`,
-    });
+    await robotcat.removeBranch({ owner, repo, branch });
   } catch (e) {
     logger.debug(e);
   }

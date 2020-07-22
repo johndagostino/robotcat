@@ -1,5 +1,7 @@
 import { Octokit } from '@octokit/rest';
 import { Logger } from 'winston';
+import { Client } from './client';
+import { getOwnerRepo } from './utils';
 
 export const pullRequest = async (options: {
   repo?: string;
@@ -9,32 +11,21 @@ export const pullRequest = async (options: {
   logger: Logger;
   client: Octokit;
 }) => {
-  const [owner, repo] = options.repo.split('/');
-  if (!owner || !repo) throw Error('Invalid Repository');
-
+  const { owner, repo } = getOwnerRepo(options.repo);
   const { branch, base, client, logger } = options;
+  const robotcat = new Client(client, logger);
 
-  try {
-    const repository = await client.repos.get({ owner, repo });
-    logger.info(`repository loaded: ${repository?.data?.full_name}`);
-  } catch (e) {
-    logger.error(`failed to load repo ${options.repo}`);
+  const repository = await robotcat.getRepository({ owner, repo });
+  if (!repository) {
     return;
   }
 
-  await client.repos.getBranch({
-    owner,
-    repo,
-    branch,
-  });
-
   const title = options.title || `${branch} -> ${base}`;
-
   logger.info(`Creating PR from ${branch} to ${base} with ${title}`);
 
   try {
-    await client.pulls.create({ owner, repo, title, base, head: branch });
+    robotcat.createPullRequest({ owner, repo, base, branch, title });
   } catch (e) {
-    logger.debug(e);
+    logger.error(e);
   }
 };
