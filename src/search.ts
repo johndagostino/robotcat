@@ -13,6 +13,7 @@ export const commit = async (options: {
   override?: boolean;
   branch?: string;
   search?: string;
+  mode?: '100644' | '100755' | '040000' | '160000' | '120000';
   replace?: string;
 }) => {
   const { owner, repo } = getOwnerRepo(options.repo);
@@ -63,6 +64,11 @@ export const commit = async (options: {
   }
 
   await robotcat.commit({ owner, repo, branch, sha, message }, [
-    { path: file, type: 'blob', mode: '100644', content: result },
+    {
+      path: file,
+      type: 'blob',
+      mode: options.mode ?? '100644',
+      content: result,
+    },
   ]);
 };

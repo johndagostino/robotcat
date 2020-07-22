@@ -20,6 +20,11 @@ const searchCommand = new Command('search');
 searchCommand
   .option('-b, --branch <branch>', 'Commit branch')
   .option('-o, --override', 'override existing branch')
+  .option(
+    '-d, --mode <mode>',
+    '100644 | 100755 | 040000 | 160000 | 120000',
+    '100644'
+  )
   .requiredOption('-r, --repo <repo>', 'Github repository')
   .requiredOption('-m, --message <message>', 'Commit message')
   .requiredOption('-f, --file <file>', 'File to change')
@@ -33,6 +38,7 @@ searchCommand
       file: options.file,
       branch: options.branch,
       override: options.override,
+      mode: options.mode,
       repo: options.repo,
       message: options.message,
       search: term,
