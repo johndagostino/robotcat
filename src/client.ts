@@ -19,21 +19,21 @@ export class Client {
   }
 
   async getFileContent({ owner, path, repo, ref }) {
-    try { 
+    try {
       const content = await this.client.repos.getContent({
-      owner,
-      repo,
-      path,
-      ref,
-    });
+        owner,
+        repo,
+        path,
+        ref,
+      });
 
-    const body = content?.data?.content;
-    const buff = Buffer.from(body, 'base64');
-    return buff.toString('utf-8');
-  } catch (e) {
-    this.logger.error(`file not found ${path}`);
-    return null;
-  }
+      const body = content?.data?.content;
+      const buff = Buffer.from(body, 'base64');
+      return buff.toString('utf-8');
+    } catch (e) {
+      this.logger.error(`file not found ${path}`);
+      return null;
+    }
   }
 
   async getRepository({ repo, owner }) {

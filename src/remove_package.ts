@@ -51,7 +51,9 @@ export const removePackage = async (options: {
     ref,
   });
 
-  if (!packageContent || !yarnContent) { return; }
+  if (!packageContent || !yarnContent) {
+    return;
+  }
 
   // yarn rm packagename
 
