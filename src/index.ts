@@ -7,7 +7,9 @@ import { pullRequest } from './pull_request';
 import { removePackage } from './remove_package';
 
 const logger = winston.createLogger({
-  transports: [new winston.transports.Console()],
+  transports: [
+    new winston.transports.Console({ format: winston.format.simple() }),
+  ],
 });
 
 const client = new Octokit({
